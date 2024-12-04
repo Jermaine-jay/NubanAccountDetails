@@ -22,7 +22,7 @@ namespace NubanAccountDetails.Paystack
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 
             _client = new HttpClient { BaseAddress = new Uri("https://api.paystack.co/") };
-
+            
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secretKey);
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -66,14 +66,11 @@ namespace NubanAccountDetails.Paystack
             return ParseAndResolveMetadata<TResponse>(ref rawJson, bankName);
         }
 
-
-
         private static string PrepareRequest<T>(T request)
         {
             (request as IPreparable)?.Prepare();
             return JsonConvert.SerializeObject(request, Formatting.Indented, SerializerSettings);
         }
-
 
         public async Task<TResponse> PostAsync<TResponse, T>(string relativeUrl, T request) where TResponse : IApiResponse
         {

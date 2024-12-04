@@ -14,11 +14,6 @@ namespace NubanAccountDetails.Paystack
         public async Task<object> GetResolveAccountNumberAsync(string accountNumber, Dictionary<string, string> dict)
         {
             var tasks = dict.Select(code => ResolveAccountNumberAsync(accountNumber, code));
-            var result = new ResolveAccountNumberResponse
-            {
-                Status = false,
-                Message = "Account not found"
-            };
             while (tasks.Any())
             {
                 var completedTask = await Task.WhenAny(tasks);
@@ -28,6 +23,11 @@ namespace NubanAccountDetails.Paystack
                 }
                 tasks = tasks.Except(new[] { completedTask });
             }
+            var result = new ResolveAccountNumberResponse
+            {
+                Status = false,
+                Message = "Account not found"
+            };
             return result;
         }
 

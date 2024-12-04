@@ -6,12 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient();
 builder.Services.AddScoped<IGetDetails, GetDetails>();
-builder.Services.AddScoped<IPaystack, Paystack>();
-builder.Services.AddScoped<IFlutterwave, Flutterwave>();
+builder.Services.AddTransient<IPaystack, Paystack>();
+builder.Services.AddTransient<IFlutterwave, Flutterwave>();
+
+builder.Services.AddHttpClient();
+builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCors(options =>
 {
@@ -24,11 +25,11 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+/*if (app.Environment.IsDevelopment())
 {
+}*/
     app.UseSwagger();
     app.UseSwaggerUI();
-}
 
 app.UseHttpsRedirection();
 app.UseForwardedHeaders();
