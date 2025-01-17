@@ -89,17 +89,17 @@ namespace NubanAccountDetails.Services
 
         private async Task<Data> ResolveAccountNumberAsync(string apiKey, string apiUrl, string accountNumber, KeyValuePair<string, string> code)
         {
-            var request = new PostRequestDto
+            PostRequestDto request = new PostRequestDto
             {
                 account_number = accountNumber,
                 account_bank = code.Key,
             };
 
-            var recipientResponse = await PostRequest(apiUrl, apiKey, request);
+            HttpResponseMessage recipientResponse = await PostRequest(apiUrl, apiKey, request);
             if (recipientResponse.IsSuccessStatusCode)
             {
-                var listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                var getResponse = JsonConvert.DeserializeObject<Response>(listResponse);
+                string listResponse = await recipientResponse.Content.ReadAsStringAsync();
+                Response getResponse = JsonConvert.DeserializeObject<Response>(listResponse);
 
                 if (getResponse.Status != "false")
                 {
@@ -119,8 +119,8 @@ namespace NubanAccountDetails.Services
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var cts = new CancellationTokenSource();
-                var recipientResponse = await _httpClient.GetAsync(apiUrl, cts.Token);
+                CancellationTokenSource cts = new CancellationTokenSource();
+                HttpResponseMessage recipientResponse = await _httpClient.GetAsync(apiUrl, cts.Token);
                 return recipientResponse;
             }
         }
@@ -131,8 +131,8 @@ namespace NubanAccountDetails.Services
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-                var jsonContent = JsonConvert.SerializeObject(request);
-                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                string jsonContent = JsonConvert.SerializeObject(request);
+                StringContent httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
                 var recipientResponse = await _httpClient.PostAsync(url, httpContent);
                 return recipientResponse;

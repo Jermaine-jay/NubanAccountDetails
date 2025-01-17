@@ -17,8 +17,8 @@ namespace NubanAccountDetails.Services
 
         public async Task<object> PastackResolveAccountNumber(string accountNumber)
         {
-            var apiUrl = $"https://api.paystack.co/bank/resolve?account_number={accountNumber}&bank_code=";
-            var result = await _getDetails.ResolveAccountNumber(_apiKey, apiUrl, BanksAndCodes.banksAndCodes);
+            string? apiUrl = $"https://api.paystack.co/bank/resolve?account_number={accountNumber}&bank_code=";
+            object? result = await _getDetails.ResolveAccountNumber(_apiKey, apiUrl, BanksAndCodes.banksAndCodes);
             return result;
         }
 
