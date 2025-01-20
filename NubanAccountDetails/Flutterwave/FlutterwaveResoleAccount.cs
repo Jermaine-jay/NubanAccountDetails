@@ -75,7 +75,7 @@ namespace NubanAccountDetails.Flutterwave
 
             if (!response.IsSuccessStatusCode)
             {
-                // Add logging here if necessary
+
                 throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
             }
 
