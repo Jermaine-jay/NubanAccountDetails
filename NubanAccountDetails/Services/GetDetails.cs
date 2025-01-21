@@ -55,7 +55,7 @@ namespace NubanAccountDetails.Services
             var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl, accountNumber, code));
             while (tasks.Any())
             {
-                var completedTask = await Task.WhenAny(tasks);
+                Task<Data> completedTask = await Task.WhenAny(tasks);
 
                 if (completedTask.Result != null)
                 {
@@ -70,12 +70,12 @@ namespace NubanAccountDetails.Services
 
         private async Task<Response> ResolveAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
         {
-            var recipientResponse = await GetRequest(apiUrl, apiKey);
+            HttpResponseMessage recipientResponse = await GetRequest(apiUrl, apiKey);
 
             if (recipientResponse.IsSuccessStatusCode)
             {
-                var listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                var getResponse = JsonConvert.DeserializeObject<Response>(listResponse);
+                string listResponse = await recipientResponse.Content.ReadAsStringAsync();
+                Response getResponse = JsonConvert.DeserializeObject<Response>(listResponse);
                 if (getResponse.Status != "false")
                 {
                     getResponse.Data.Bank_name = (code.Value).ToUpper();
@@ -115,7 +115,7 @@ namespace NubanAccountDetails.Services
 
         public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
         {
-            using (var _httpClient = new HttpClient())
+            using (HttpClient _httpClient = new HttpClient())
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -127,14 +127,14 @@ namespace NubanAccountDetails.Services
 
         public async Task<HttpResponseMessage> PostRequest<T>(string url, string apiKey, T? request) where T : class
         {
-            using (var _httpClient = new HttpClient())
+            using (HttpClient _httpClient = new HttpClient())
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
                 string jsonContent = JsonConvert.SerializeObject(request);
                 StringContent httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                var recipientResponse = await _httpClient.PostAsync(url, httpContent);
+                HttpResponseMessage recipientResponse = await _httpClient.PostAsync(url, httpContent);
                 return recipientResponse;
             }
         }
