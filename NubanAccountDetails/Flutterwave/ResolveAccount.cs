@@ -16,7 +16,7 @@ namespace NubanAccountDetails.Flutterwave
         public async Task<object> GetResolveAccountNumberAsync(string accountNumber, Dictionary<string, string> dict)
         {
             var tasks = dict.Select(code => ResolveAccountNumberAsync(accountNumber, code));
-            var result = new ResolveAccountNumberResponse
+            ResolveAccountNumberResponse result = new()
             {
                 Status = false,
                 Message = "Account not found"
@@ -24,7 +24,7 @@ namespace NubanAccountDetails.Flutterwave
 
             while (tasks.Any())
             {
-                var completedTask = await Task.WhenAny(tasks);
+                Task<ResolveAccountResponse> completedTask = await Task.WhenAny(tasks);
                 if (completedTask.Result != null)
                 {
                     return completedTask.Result;
@@ -36,7 +36,7 @@ namespace NubanAccountDetails.Flutterwave
 
         public async Task<ResolveAccountResponse> ResolveAccountNumberAsync(string accountNumber, KeyValuePair<string, string> code)
         {
-            var response = await _api.PostAsync<ResolveAccountResponse, object>("accounts/resolve", new
+            ResolveAccountResponse response = await _api.PostAsync<ResolveAccountResponse, object>("accounts/resolve", new
             {
                 account_number = accountNumber,
                 account_bank = code.Key
