@@ -38,7 +38,7 @@ namespace NubanAccountDetails.Services
                 {
                     return completedTask.Result;
                 }
-                var result = new Response
+                var result = new ResponseDto
                 {
                     Status = "false",
                     Message = "Account not found"
@@ -68,14 +68,14 @@ namespace NubanAccountDetails.Services
         }
 
 
-        private async Task<Response> ResolveAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
+        private async Task<ResponseDto> ResolveAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
         {
             HttpResponseMessage recipientResponse = await GetRequest(apiUrl, apiKey);
 
             if (recipientResponse.IsSuccessStatusCode)
             {
                 string listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                Response getResponse = JsonConvert.DeserializeObject<Response>(listResponse);
+                ResponseDto getResponse = JsonConvert.DeserializeObject<ResponseDto>(listResponse);
                 if (getResponse.Status != "false")
                 {
                     getResponse.Data.Bank_name = (code.Value).ToUpper();
@@ -99,7 +99,7 @@ namespace NubanAccountDetails.Services
             if (recipientResponse.IsSuccessStatusCode)
             {
                 string listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                Response getResponse = JsonConvert.DeserializeObject<Response>(listResponse);
+                ResponseDto getResponse = JsonConvert.DeserializeObject<ResponseDto>(listResponse);
 
                 if (getResponse.Status != "false")
                 {
@@ -137,37 +137,6 @@ namespace NubanAccountDetails.Services
                 HttpResponseMessage recipientResponse = await _httpClient.PostAsync(url, httpContent);
                 return recipientResponse;
             }
-        }
-
-        public class PostRequestDto
-        {
-            public string account_number { get; set; }
-            public string account_bank { get; set; }
-        }
-
-        public class Response
-        {
-            public string Status { get; set; }
-            public string Message { get; set; }
-
-            public Data Data { get; set; }
-        }
-
-        public class Data
-        {
-            public string Bank_name { get; set; }
-            public string Bank_Id { get; set; }
-            public string Account_name { get; set; }
-            public string Account_number { get; set; }
-
-        }
-
-        public class Result
-        {
-            public string BankId { get; set; }
-            public string AccountName { get; set; }
-            public string AccountNumber { get; set; }
-
-        }
+        }     
     }
 }
