@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NubanAccountDetails.Response;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -64,7 +65,7 @@ namespace NubanAccountDetails.Services
 
                 tasks = tasks.Except(new[] { completedTask });
             }
-            return tasks.Where(c=>c.Status.Equals("false"));
+            return tasks.Where(c => c.Status.Equals("false"));
         }
 
 
@@ -137,6 +138,6 @@ namespace NubanAccountDetails.Services
                 HttpResponseMessage recipientResponse = await _httpClient.PostAsync(url, httpContent);
                 return recipientResponse;
             }
-        }     
+        }
     }
 }

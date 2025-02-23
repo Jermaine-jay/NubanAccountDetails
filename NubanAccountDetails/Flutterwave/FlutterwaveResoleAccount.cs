@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NubanAccountDetails.Paystack;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -48,8 +47,7 @@ namespace NubanAccountDetails.Flutterwave
                 data["bank_Id"] = bankDetails.Key;
             }
 
-           
-;           rawJson = jObject.ToString();
+            rawJson = jObject.ToString();
             TR val = JsonConvert.DeserializeObject<TR>(rawJson);
 
             if (val is IHasRawResponse hasRawResponse)
@@ -75,7 +73,6 @@ namespace NubanAccountDetails.Flutterwave
 
             if (!response.IsSuccessStatusCode)
             {
-
                 throw new HttpRequestException($"Request failed with status code {response.StatusCode}");
             }
 

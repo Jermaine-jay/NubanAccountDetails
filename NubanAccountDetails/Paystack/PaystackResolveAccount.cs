@@ -56,7 +56,7 @@ namespace NubanAccountDetails.Paystack
 
         public async Task<TResponse> GetAsync<TResponse, T>(string relativeUrl, T request, string bankName) where TResponse : class, IApiResponse
         {
-            IPreparable preparable = request as IPreparable;
+            IPreparable? preparable = request as IPreparable;
             string queryString = request != null ? "?" + request.ToQueryString() : string.Empty;
 
             preparable?.Prepare();
