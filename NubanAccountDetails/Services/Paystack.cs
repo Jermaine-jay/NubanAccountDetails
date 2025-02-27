@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http.Headers;
-using static NubanAccountDetails.Services.GetDetails;
 
 namespace NubanAccountDetails.Services
 {
@@ -22,47 +21,48 @@ namespace NubanAccountDetails.Services
             return result;
         }
 
-        /* public async Task<Dictionary<string, string>> GetBanks(string apiKey)
-         {
-             var apiUrl = "https://api.paystack.co/bank?currency=NGN";
-             var listofBanksCode = new Dictionary<string, string>();
+        public async Task<ListBankResponse> GetBanks()
+        {
+            var apiUrl = "https://api.paystack.co/bank?currency=NGN";
+            var listofBanksCode = new Dictionary<string, string>();
 
-             var recipientResponse = await GetRequest(apiUrl, apiKey);
+            var recipientResponse = await GetRequest(apiUrl, _apiKey);
 
-             if (recipientResponse.IsSuccessStatusCode)
-             {
-                 var listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                 var getResponse = JsonConvert.DeserializeObject<ListBankResponse>(listResponse);
+            if (recipientResponse.IsSuccessStatusCode)
+            {
+                var listResponse = await recipientResponse.Content.ReadAsStringAsync();
+                var getResponse = JsonConvert.DeserializeObject<ListBankResponse>(listResponse);
 
-                 var tasks = getResponse.data.Select(async pair =>
-                 {
-                     var bankResponse = await ResolveAccountNumberAsync(apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
-                     if (bankResponse != null && bankResponse.Bank_name != null)
-                     {
-                         listofBanksCode.Add(pair.code, pair.name);
-                     }
-                 });
+                var tasks = getResponse.data.Select(async pair =>
+                {
+                    var bankResponse = await ResolveAccountNumberAsync(apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
+                    if (bankResponse != null && bankResponse.Bank_name != null)
+                    {
+                        listofBanksCode.Add(pair.code, pair.name);
+                    }
+                });
 
-                 await Task.WhenAll(tasks);
-             }
+                await Task.WhenAll(tasks);
+                return getResponse;
+            }
 
-             return listofBanksCode;
-         }*/
+            return null;
+        }
 
 
-        /* public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
-         {
-             using (var httpClient = new HttpClient())
-             {
-                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                 var cts = new CancellationTokenSource();
-                 var recipientResponse = await httpClient.GetAsync(apiUrl, cts.Token);
-                 return recipientResponse;
-             }
-         }*/
+        public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var cts = new CancellationTokenSource();
+                var recipientResponse = await httpClient.GetAsync(apiUrl, cts.Token);
+                return recipientResponse;
+            }
+        }
 
-        /*public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
+        public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
         {
             var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code));
             var completedTasks = await Task.WhenAll(tasks);
@@ -76,9 +76,9 @@ namespace NubanAccountDetails.Services
             }
 
             return "Account does not exist!";
-        }*/
+        }
 
-        /*private async Task<Data> ResolveAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
+        private async Task<Data> ResolveAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
         {
             var recipientResponse = await GetRequest(apiUrl, apiKey);
 
@@ -96,11 +96,11 @@ namespace NubanAccountDetails.Services
             }
 
             return null;
-        }*/
+        }
 
 
 
-        /*public class ListBankResponse
+        public class ListBankResponse
         {
             public string status { get; set; }
             public string message { get; set; }
@@ -124,31 +124,31 @@ namespace NubanAccountDetails.Services
             }
         }
 
-    }*/
-        /* public static class ExtendingMethods
-         {
-             public static async Task ExtendDictionaryAsync(this Dictionary<string, string> dict)
-             {
-                 var result = dict.Select(x => ResolveDictAsync(x));
-                 await Task.WhenAll(result);
-             }
-             public static async Task ResolveDictAsync(KeyValuePair<string, string> dict)
-             {
-                 Console.Write($"[{dict.Key}, {dict.Value}]");
-             }
-
-             public static IEnumerable<KeyValuePair<string, string>> ExtendDictionary(this Dictionary<string, string> dict)
-             {
-                 var result = dict.Select(x => ResolveDict(x));
-                 return result;
-             }
-
-
-             public static KeyValuePair<string, string> ResolveDict(KeyValuePair<string, string> dict)
-             {
-                 Console.Write($"[{dict.Key}, {dict.Value}]");
-                 return dict;
-             }
-         }*/
     }
+    /* public static class ExtendingMethods
+     {
+         public static async Task ExtendDictionaryAsync(this Dictionary<string, string> dict)
+         {
+             var result = dict.Select(x => ResolveDictAsync(x));
+             await Task.WhenAll(result);
+         }
+         public static async Task ResolveDictAsync(KeyValuePair<string, string> dict)
+         {
+             Console.Write($"[{dict.Key}, {dict.Value}]");
+         }
+
+         public static IEnumerable<KeyValuePair<string, string>> ExtendDictionary(this Dictionary<string, string> dict)
+         {
+             var result = dict.Select(x => ResolveDict(x));
+             return result;
+         }
+
+
+         public static KeyValuePair<string, string> ResolveDict(KeyValuePair<string, string> dict)
+         {
+             Console.Write($"[{dict.Key}, {dict.Value}]");
+             return dict;
+         }
+     }*/
 }
+

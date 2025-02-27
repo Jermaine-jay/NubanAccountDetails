@@ -27,13 +27,13 @@ namespace NubanAccountDetails.Controllers
             return Ok(result);
         }
 
-        /*[HttpGet("paystack-banks")]
+        [HttpGet("paystack-banks")]
         public async Task<IActionResult> GetPaystackbanks()
         {
 
-            var result = await _paystack.Getallbanks();
+            var result = await _paystack.GetBanks();
             return Ok(result);
-        }*/
+        }
 
 
         [HttpGet("flutterwave")]

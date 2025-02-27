@@ -58,13 +58,11 @@ namespace NubanAccountDetails.Flutterwave
             return val;
         }
 
-
         private static string PrepareRequest<T>(T request)
         {
             (request as IPreparable)?.Prepare();
             return JsonConvert.SerializeObject(request, Formatting.Indented, SerializerSettings);
         }
-
 
         public async Task<TResponse> PostAsync<TResponse, T>(string relativeUrl, T request, KeyValuePair<string, string> value) where TResponse : IResponse
         {
