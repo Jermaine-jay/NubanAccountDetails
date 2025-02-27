@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NubanAccountDetails.Flutterwave;
 using System.Net.Http.Headers;
 
 namespace NubanAccountDetails.Services
@@ -7,10 +8,12 @@ namespace NubanAccountDetails.Services
     {
         private readonly IGetDetails _getDetails;
         private readonly string _apiKey;
+        private readonly IResolveAccount _resolveAccount;
 
-        public Paystack(IGetDetails getDetails)
+        public Paystack(IGetDetails getDetails, IResolveAccount resolveAccount)
         {
             _getDetails = getDetails;
+            _resolveAccount = resolveAccount;
             _apiKey = "sk_test_6c6fc60af0119e14cad8cad7000eb9916014a998";
         }
 
@@ -35,7 +38,7 @@ namespace NubanAccountDetails.Services
 
                 var tasks = getResponse.data.Select(async pair =>
                 {
-                    var bankResponse = await ResolveAccountNumberAsync(apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
+                    var bankResponse = await _resolveAccount.ResolveAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
                     if (bankResponse != null && bankResponse.Bank_name != null)
                     {
                         listofBanksCode.Add(pair.code, pair.name);
@@ -62,7 +65,7 @@ namespace NubanAccountDetails.Services
             }
         }
 
-        public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
+        p/*ublic async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
         {
             var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code));
             var completedTasks = await Task.WhenAll(tasks);
@@ -97,7 +100,7 @@ namespace NubanAccountDetails.Services
 
             return null;
         }
-
+*/
 
 
         public class ListBankResponse
