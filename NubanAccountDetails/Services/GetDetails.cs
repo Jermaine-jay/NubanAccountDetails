@@ -3,6 +3,7 @@ using NubanAccountDetails.Response;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using static NubanAccountDetails.Services.Paystack;
 
 namespace NubanAccountDetails.Services
 {
@@ -28,27 +29,59 @@ namespace NubanAccountDetails.Services
         }*/
 
 
-        public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
+        //public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl)
+        //{
+        //    var a = GetBanks(apiKey);
+        //    var tasks = a.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code)).ToList();
+        //    while (tasks.Any())
+        //    {
+        //        var completedTask = await Task.WhenAny(tasks);
+        //        tasks.Remove(completedTask); // Remove completed task from the list
+        //        if (await completedTask != null)
+        //        {
+        //            return completedTask.Result;
+        //        }
+        //        var result = new ResponseDto
+        //        {
+        //            Status = "false",
+        //            Message = "Account not found"
+        //        };
+        //        return result;
+        //    }
+
+        //    return HttpStatusCode.BadRequest;
+        //}
+
+
+        public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl)
         {
-            var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code));
+            var banks = await GetBanks(apiKey);
+
+            var tasks = banks.Select(async bank =>
+            {
+                return await ResolveAccountNumberAsync(apiKey, $"{apiUrl}{bank.Key}", bank);
+            }).ToList();
+
             while (tasks.Any())
             {
                 var completedTask = await Task.WhenAny(tasks);
+                tasks.Remove(completedTask); // Remove completed task from the list
 
-                if (completedTask.Result != null)
+                var result = await completedTask; // Await the result of the completed task
+
+                if (result != null && result.Status.Equals("true", StringComparison.OrdinalIgnoreCase))
                 {
-                    return completedTask.Result;
+                    return result;
                 }
-                var result = new ResponseDto
-                {
-                    Status = "false",
-                    Message = "Account not found"
-                };
-                return result;
             }
 
-            return HttpStatusCode.BadRequest;
+            return new ResponseDto
+            {
+                Status = "false",
+                Message = "Account not found"
+            };
         }
+
 
 
         public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, string accountNumber, Dictionary<string, string> dict)
@@ -138,6 +171,40 @@ namespace NubanAccountDetails.Services
                 HttpResponseMessage recipientResponse = await _httpClient.PostAsync(url, httpContent);
                 return recipientResponse;
             }
+        }
+
+        public async Task<Dictionary<string, string>> GetBanks(string apikey)
+        {
+            var apiUrl = "https://api.paystack.co/bank?currency=NGN";
+            var listofBanksCode = new Dictionary<string, string>();
+
+            var recipientResponse = GetRequest(apiUrl, apikey).Result;
+
+            if (recipientResponse.IsSuccessStatusCode)
+            {
+                var listResponse = recipientResponse.Content.ReadAsStringAsync().Result;
+                var getResponse = JsonConvert.DeserializeObject<ListBankResponse>(listResponse);
+
+                /* var tasks = getResponse.data.Select(async pair =>
+                 {
+                     //var bankResponse = await _resolveAccount.ResolveAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
+                     if (pair.code != null && pair.name != null)
+                     {
+                         listofBanksCode.Add(pair.code, pair.name);
+                     }
+                 });*/
+                foreach (var pair in getResponse.data)
+                {
+                    if (!string.IsNullOrEmpty(pair.code) && !string.IsNullOrEmpty(pair.name))
+                    {
+                        listofBanksCode[pair.code] = pair.name; // Using indexer to avoid duplicate key exception
+                    }
+                }
+                //await Task.WhenAll(tasks);
+                return listofBanksCode;
+            }
+
+            return null;
         }
     }
 }

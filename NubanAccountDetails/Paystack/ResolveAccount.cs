@@ -41,46 +41,20 @@ namespace NubanAccountDetails.Paystack
         {
             ResolveAccountNumberResponse res = await _api.GetAsync<ResolveAccountNumberResponse, object>("bank/resolve", new
             {
-                account_number = accountNumber,
-                bank_code = code.Key
+                account_number = "3187664210",
+                bank_code = "11"
             }, code.Value);
             return res;
         }
 
         public async Task<object> PaystackResolveAccountNumberAsync(string accountNumber)
         {
-            var getbanks = await GetBanks();
-            object? result = await GetResolveAccountNumberAsync(accountNumber, getbanks);
+           // var getbanks = await GetBanks();
+            object? result = await GetResolveAccountNumberAsync(accountNumber, BanksAndCodes.banksAndCodes);
             return result;
         }
 
-        public async Task<Dictionary<string, string>> GetBanks()
-        {
-            var apiUrl = "https://api.paystack.co/bank?currency=NGN";
-            var listofBanksCode = new Dictionary<string, string>();
-
-            var recipientResponse = await GetRequest(apiUrl, _apiKey);
-
-            if (recipientResponse.IsSuccessStatusCode)
-            {
-                var listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                var getResponse = JsonConvert.DeserializeObject<ListBankResponse>(listResponse);
-
-                var tasks = getResponse.data.Select(async pair =>
-                {
-                    //var bankResponse = await _resolveAccount.ResolveAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
-                    if (pair.code != null && pair.name != null)
-                    {
-                        listofBanksCode.Add(pair.code, pair.name);
-                    }
-                });
-
-                await Task.WhenAll(tasks);
-                return listofBanksCode;
-            }
-
-            return null;
-        }
+        
 
         public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
         {

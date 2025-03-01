@@ -8,23 +8,20 @@ namespace NubanAccountDetails.Services
     {
         private readonly IGetDetails _getDetails;
         private readonly string _apiKey;
-        private readonly IResolveAccount _resolveAccount;
-
-        public Paystack(IGetDetails getDetails, IResolveAccount resolveAccount)
+        public Paystack(IGetDetails getDetails)
         {
             _getDetails = getDetails;
-            _resolveAccount = resolveAccount;
             _apiKey = "sk_test_6c6fc60af0119e14cad8cad7000eb9916014a998";
         }
 
         public async Task<object> PastackResolveAccountNumber(string accountNumber)
         {
             string? apiUrl = $"https://api.paystack.co/bank/resolve?account_number={accountNumber}&bank_code=";
-            object? result = await _getDetails.ResolveAccountNumber(_apiKey, apiUrl, BanksAndCodes.banksAndCodes);
+            object? result = await _getDetails.ResolveAccountNumber(_apiKey, apiUrl);
             return result;
         }
 
-        public async Task<ListBankResponse> GetBanks()
+        /*public async Task<ListBankResponse> GetBanks()
         {
             var apiUrl = "https://api.paystack.co/bank?currency=NGN";
             var listofBanksCode = new Dictionary<string, string>();
@@ -63,9 +60,9 @@ namespace NubanAccountDetails.Services
                 var recipientResponse = await httpClient.GetAsync(apiUrl, cts.Token);
                 return recipientResponse;
             }
-        }
+        }*/
 
-        p/*ublic async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
+        /*ublic async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
         {
             var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code));
             var completedTasks = await Task.WhenAll(tasks);
