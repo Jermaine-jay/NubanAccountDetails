@@ -65,9 +65,9 @@ namespace NubanAccountDetails.Services
             while (tasks.Any())
             {
                 var completedTask = await Task.WhenAny(tasks);
-                tasks.Remove(completedTask); // Remove completed task from the list
+                tasks.Remove(completedTask); 
 
-                var result = await completedTask; // Await the result of the completed task
+                var result = await completedTask; 
 
                 if (result != null && result.Status.Equals("true", StringComparison.OrdinalIgnoreCase))
                 {
