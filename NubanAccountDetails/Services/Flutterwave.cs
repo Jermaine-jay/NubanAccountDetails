@@ -16,7 +16,7 @@
         {
             string? apiUrl = $"https://api.flutterwave.com/v3/accounts/resolve";
             //var apiUrl = $"https://cashierapi.opayweb.com/api/v3/verification/accountNumber/resolve?bankCode=057&bankAccountNo=2088238216&countryCode=NG";
-            object? result = await _getDetails.ResolveAccountNumber(_apiKey, apiUrl,accountNumber, BanksAndCodes.banksAndCodes);
+            object? result = await _getDetails.ResolveFlutterAccountNumber(_apiKey, apiUrl,accountNumber, BanksAndCodes.banksAndCodes);
             return result;
         }
     }

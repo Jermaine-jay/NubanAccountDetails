@@ -35,7 +35,7 @@ namespace NubanAccountDetails.Services
 
                 var tasks = getResponse.data.Select(async pair =>
                 {
-                    var bankResponse = await _resolveAccount.ResolveAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
+                    var bankResponse = await _resolveAccount.ResolveFlutterAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
                     if (bankResponse != null && bankResponse.Bank_name != null)
                     {
                         listofBanksCode.Add(pair.code, pair.name);
@@ -62,9 +62,9 @@ namespace NubanAccountDetails.Services
             }
         }*/
 
-        /*ublic async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
+        /*ublic async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
         {
-            var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code));
+            var tasks = dict.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl + code.Key, code));
             var completedTasks = await Task.WhenAll(tasks);
 
             foreach (var completedTask in completedTasks)
@@ -78,7 +78,7 @@ namespace NubanAccountDetails.Services
             return "Account does not exist!";
         }
 
-        private async Task<Data> ResolveAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
+        private async Task<Data> ResolveFlutterAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
         {
             var recipientResponse = await GetRequest(apiUrl, apiKey);
 
@@ -100,30 +100,31 @@ namespace NubanAccountDetails.Services
 */
 
 
-    /* public static class ExtendingMethods
-     {
-         public static async Task ExtendDictionaryAsync(this Dictionary<string, string> dict)
+        /* public static class ExtendingMethods
          {
-             var result = dict.Select(x => ResolveDictAsync(x));
-             await Task.WhenAll(result);
-         }
-         public static async Task ResolveDictAsync(KeyValuePair<string, string> dict)
-         {
-             Console.Write($"[{dict.Key}, {dict.Value}]");
-         }
+             public static async Task ExtendDictionaryAsync(this Dictionary<string, string> dict)
+             {
+                 var result = dict.Select(x => ResolveDictAsync(x));
+                 await Task.WhenAll(result);
+             }
+             public static async Task ResolveDictAsync(KeyValuePair<string, string> dict)
+             {
+                 Console.Write($"[{dict.Key}, {dict.Value}]");
+             }
 
-         public static IEnumerable<KeyValuePair<string, string>> ExtendDictionary(this Dictionary<string, string> dict)
-         {
-             var result = dict.Select(x => ResolveDict(x));
-             return result;
-         }
+             public static IEnumerable<KeyValuePair<string, string>> ExtendDictionary(this Dictionary<string, string> dict)
+             {
+                 var result = dict.Select(x => ResolveDict(x));
+                 return result;
+             }
 
 
-         public static KeyValuePair<string, string> ResolveDict(KeyValuePair<string, string> dict)
-         {
-             Console.Write($"[{dict.Key}, {dict.Value}]");
-             return dict;
-         }
-     }*/
+             public static KeyValuePair<string, string> ResolveDict(KeyValuePair<string, string> dict)
+             {
+                 Console.Write($"[{dict.Key}, {dict.Value}]");
+                 return dict;
+             }
+         }*/
+    }
 }
 

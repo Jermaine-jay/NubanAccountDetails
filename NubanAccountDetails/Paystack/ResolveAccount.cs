@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json;
-using NubanAccountDetails.Services;
-using System.Net.Http.Headers;
-using static NubanAccountDetails.Services.Paystack;
-
-namespace NubanAccountDetails.Paystack
+﻿namespace NubanAccountDetails.Paystack
 {
     public class ResolveAccount : IResolveAccount
     {
@@ -19,21 +14,30 @@ namespace NubanAccountDetails.Paystack
 
         public async Task<object> GetResolveAccountNumberAsync(string accountNumber, Dictionary<string, string> dict)
         {
-            var tasks = dict.Select(code => ResolveAccountNumberAsync(accountNumber, code));
+            var tasks = dict.Select(async bank =>
+            {
+                return await ResolveAccountNumberAsync(accountNumber, bank);
+            }).ToList();
+
             while (tasks.Any())
             {
                 Task<ResolveAccountNumberResponse> completedTask = await Task.WhenAny(tasks);
-                if (completedTask.Result != null)
+                tasks.Remove(completedTask);
+
+                ResolveAccountNumberResponse response = await completedTask;
+
+                if (response != null && response.Status.Equals(true))
                 {
-                    return completedTask.Result;
+                    return response;
                 }
-                tasks = tasks.Except(new[] { completedTask });
             }
+
             ResolveAccountNumberResponse result = new ResolveAccountNumberResponse
             {
                 Status = false,
                 Message = "Account not found"
             };
+
             return result;
         }
 
@@ -41,31 +45,54 @@ namespace NubanAccountDetails.Paystack
         {
             ResolveAccountNumberResponse res = await _api.GetAsync<ResolveAccountNumberResponse, object>("bank/resolve", new
             {
-                account_number = "3187664210",
-                bank_code = "11"
+                account_number = accountNumber,
+                bank_code = code.Key,
             }, code.Value);
             return res;
         }
 
         public async Task<object> PaystackResolveAccountNumberAsync(string accountNumber)
         {
-           // var getbanks = await GetBanks();
-            object? result = await GetResolveAccountNumberAsync(accountNumber, BanksAndCodes.banksAndCodes);
+            var getbanks = await GetBanks();
+            var result = await GetResolveAccountNumberAsync(accountNumber, getbanks);
             return result;
         }
 
-        
 
-        public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
+
+        //public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
+        //{
+        //    using (var httpClient = new HttpClient())
+        //    {
+        //        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        //        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        //        var cts = new CancellationTokenSource();
+        //        var recipientResponse = await httpClient.GetAsync(apiUrl, cts.Token);
+        //        return recipientResponse;
+        //    }
+        //}
+
+        public async Task<Dictionary<string, string>> GetBanks()
         {
-            using (var httpClient = new HttpClient())
+            var listofBanksCode = new Dictionary<string, string>();
+
+            var recipientResponse = await _api.GetAsync<BankResponse, object>("bank?currency", new
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var cts = new CancellationTokenSource();
-                var recipientResponse = await httpClient.GetAsync(apiUrl, cts.Token);
-                return recipientResponse;
+                currency = "NGN"
+            }, null);
+
+            if (recipientResponse.Status)
+            {
+                foreach (var pair in recipientResponse.data)
+                {
+                    if (!string.IsNullOrEmpty(pair.code) && !string.IsNullOrEmpty(pair.name))
+                    {
+                        listofBanksCode[pair.code] = pair.name;
+                    }
+                }
+                return listofBanksCode;
             }
+            return null;
         }
     }
 }

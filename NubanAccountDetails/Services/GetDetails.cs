@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NubanAccountDetails.Response;
-using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using static NubanAccountDetails.Services.Paystack;
 
 namespace NubanAccountDetails.Services
 {
@@ -15,9 +13,9 @@ namespace NubanAccountDetails.Services
             _configuration = configuration;
         }
 
-        /*public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
+        /*public async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
         {
-            var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code));
+            var tasks = dict.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl + code.Key, code));
             var completedTask = await Task.WhenAny(tasks);
 
             if (completedTask != null && completedTask.Result != null)
@@ -29,10 +27,10 @@ namespace NubanAccountDetails.Services
         }*/
 
 
-        //public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl)
+        //public async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl)
         //{
         //    var a = GetBanks(apiKey);
-        //    var tasks = a.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl + code.Key, code)).ToList();
+        //    var tasks = a.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl + code.Key, code)).ToList();
         //    while (tasks.Any())
         //    {
         //        var completedTask = await Task.WhenAny(tasks);
@@ -56,18 +54,17 @@ namespace NubanAccountDetails.Services
         public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl)
         {
             var banks = await GetBanks(apiKey);
-
             var tasks = banks.Select(async bank =>
             {
-                return await ResolveAccountNumberAsync(apiKey, $"{apiUrl}{bank.Key}", bank);
+                return await GetBankNameAsync(apiKey, $"{apiUrl}{bank.Key}", bank);
             }).ToList();
 
             while (tasks.Any())
             {
                 var completedTask = await Task.WhenAny(tasks);
-                tasks.Remove(completedTask); 
+                tasks.Remove(completedTask);
 
-                var result = await completedTask; 
+                var result = await completedTask;
 
                 if (result != null && result.Status.Equals("true", StringComparison.OrdinalIgnoreCase))
                 {
@@ -82,11 +79,9 @@ namespace NubanAccountDetails.Services
             };
         }
 
-
-
-        public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl, string accountNumber, Dictionary<string, string> dict)
+        public async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl, string accountNumber, Dictionary<string, string> dict)
         {
-            var tasks = dict.Select(code => ResolveAccountNumberAsync(apiKey, apiUrl, accountNumber, code));
+            var tasks = dict.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl, accountNumber, code));
             while (tasks.Any())
             {
                 Task<Data> completedTask = await Task.WhenAny(tasks);
@@ -102,7 +97,7 @@ namespace NubanAccountDetails.Services
         }
 
 
-        private async Task<ResponseDto> ResolveAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
+        private async Task<ResponseDto> GetBankNameAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
         {
             HttpResponseMessage recipientResponse = await GetRequest(apiUrl, apiKey);
 
@@ -121,7 +116,7 @@ namespace NubanAccountDetails.Services
             return null;
         }
 
-        private async Task<Data> ResolveAccountNumberAsync(string apiKey, string apiUrl, string accountNumber, KeyValuePair<string, string> code)
+        private async Task<Data> ResolveFlutterAccountNumberAsync(string apiKey, string apiUrl, string accountNumber, KeyValuePair<string, string> code)
         {
             PostRequestDto request = new PostRequestDto
             {
@@ -187,7 +182,7 @@ namespace NubanAccountDetails.Services
 
                 /* var tasks = getResponse.data.Select(async pair =>
                  {
-                     //var bankResponse = await _resolveAccount.ResolveAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
+                     //var bankResponse = await _resolveAccount.ResolveFlutterAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
                      if (pair.code != null && pair.name != null)
                      {
                          listofBanksCode.Add(pair.code, pair.name);
