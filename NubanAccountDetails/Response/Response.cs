@@ -13,6 +13,5 @@
         public string Bank_Id { get; set; }
         public string Account_name { get; set; }
         public string Account_number { get; set; }
-
     }
 }

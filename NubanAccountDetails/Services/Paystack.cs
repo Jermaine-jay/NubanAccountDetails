@@ -64,7 +64,7 @@ namespace NubanAccountDetails.Services
 
         /*ublic async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
         {
-            var tasks = dict.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl + code.Key, code));
+            var tasks = dict.Select(code => GetFlutterBankNameAsync(apiKey, apiUrl + code.Key, code));
             var completedTasks = await Task.WhenAll(tasks);
 
             foreach (var completedTask in completedTasks)
@@ -78,7 +78,7 @@ namespace NubanAccountDetails.Services
             return "Account does not exist!";
         }
 
-        private async Task<Data> ResolveFlutterAccountNumberAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
+        private async Task<Data> GetFlutterBankNameAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
         {
             var recipientResponse = await GetRequest(apiUrl, apiKey);
 

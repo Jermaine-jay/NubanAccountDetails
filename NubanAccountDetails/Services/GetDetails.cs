@@ -13,44 +13,6 @@ namespace NubanAccountDetails.Services
             _configuration = configuration;
         }
 
-        /*public async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl, Dictionary<string, string> dict)
-        {
-            var tasks = dict.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl + code.Key, code));
-            var completedTask = await Task.WhenAny(tasks);
-
-            if (completedTask != null && completedTask.Result != null)
-            {
-                return completedTask.Result;
-            }
-
-            return "Account does not exist!";
-        }*/
-
-
-        //public async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl)
-        //{
-        //    var a = GetBanks(apiKey);
-        //    var tasks = a.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl + code.Key, code)).ToList();
-        //    while (tasks.Any())
-        //    {
-        //        var completedTask = await Task.WhenAny(tasks);
-        //        tasks.Remove(completedTask); // Remove completed task from the list
-        //        if (await completedTask != null)
-        //        {
-        //            return completedTask.Result;
-        //        }
-        //        var result = new ResponseDto
-        //        {
-        //            Status = "false",
-        //            Message = "Account not found"
-        //        };
-        //        return result;
-        //    }
-
-        //    return HttpStatusCode.BadRequest;
-        //}
-
-
         public async Task<object> ResolveAccountNumber(string apiKey, string apiUrl)
         {
             var banks = await GetBanks(apiKey);
@@ -61,10 +23,10 @@ namespace NubanAccountDetails.Services
 
             while (tasks.Any())
             {
-                var completedTask = await Task.WhenAny(tasks);
+                Task<ResponseDto> completedTask = await Task.WhenAny(tasks);
                 tasks.Remove(completedTask);
 
-                var result = await completedTask;
+                ResponseDto result = await completedTask;
 
                 if (result != null && result.Status.Equals("true", StringComparison.OrdinalIgnoreCase))
                 {
@@ -79,23 +41,31 @@ namespace NubanAccountDetails.Services
             };
         }
 
-        public async Task<object> ResolveFlutterAccountNumber(string apiKey, string apiUrl, string accountNumber, Dictionary<string, string> dict)
+        public async Task<object> ResolveFlutterAccountNumber(
+            string apiKey, string apiUrl, string accountNumber, 
+            Dictionary<string, string> dict)
         {
-            var tasks = dict.Select(code => ResolveFlutterAccountNumberAsync(apiKey, apiUrl, accountNumber, code));
+            var tasks = dict.Select(async code =>
+            {
+                return await GetFlutterBankNameAsync(apiKey, apiUrl, accountNumber, code);
+            }).ToList();
             while (tasks.Any())
             {
-                Task<Data> completedTask = await Task.WhenAny(tasks);
+                Task<ResponseDto> completedTask = await Task.WhenAny(tasks);
 
-                if (completedTask.Result != null)
+                ResponseDto result = await completedTask;
+
+                if (result != null && result.Status.Equals("true", StringComparison.OrdinalIgnoreCase))
                 {
-                    return completedTask.Result;
+                    return result;
                 }
-
-                tasks = tasks.Except(new[] { completedTask });
             }
-            return tasks.Where(c => c.Status.Equals("false"));
+            return new ResponseDto
+            {
+                Status = "false",
+                Message = "Account not found"
+            };
         }
-
 
         private async Task<ResponseDto> GetBankNameAsync(string apiKey, string apiUrl, KeyValuePair<string, string> code)
         {
@@ -104,7 +74,7 @@ namespace NubanAccountDetails.Services
             if (recipientResponse.IsSuccessStatusCode)
             {
                 string listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                ResponseDto getResponse = JsonConvert.DeserializeObject<ResponseDto>(listResponse);
+                ResponseDto? getResponse = JsonConvert.DeserializeObject<ResponseDto>(listResponse);
                 if (getResponse.Status != "false")
                 {
                     getResponse.Data.Bank_name = (code.Value).ToUpper();
@@ -113,10 +83,16 @@ namespace NubanAccountDetails.Services
                 return getResponse;
             }
 
-            return null;
+            return new ResponseDto
+            {
+                Status = "false",
+                Message = "Bank not found"
+            };
         }
 
-        private async Task<Data> ResolveFlutterAccountNumberAsync(string apiKey, string apiUrl, string accountNumber, KeyValuePair<string, string> code)
+        private async Task<ResponseDto> GetFlutterBankNameAsync(
+            string apiKey, string apiUrl, string accountNumber, 
+            KeyValuePair<string, string> code)
         {
             PostRequestDto request = new PostRequestDto
             {
@@ -128,19 +104,22 @@ namespace NubanAccountDetails.Services
             if (recipientResponse.IsSuccessStatusCode)
             {
                 string listResponse = await recipientResponse.Content.ReadAsStringAsync();
-                ResponseDto getResponse = JsonConvert.DeserializeObject<ResponseDto>(listResponse);
+                ResponseDto? getResponse = JsonConvert.DeserializeObject<ResponseDto>(listResponse);
 
-                if (getResponse.Status != "false")
+                if (getResponse?.Status != "false")
                 {
                     getResponse.Data.Bank_name = (code.Value).ToUpper();
                     getResponse.Data.Bank_Id = code.Key;
-                    return getResponse.Data;
+                    return getResponse;
                 }
             }
 
-            return null;
+            return new ResponseDto
+            {
+                Status = "false",
+                Message = "Bank not found"
+            };
         }
-
 
         public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
         {
@@ -177,25 +156,15 @@ namespace NubanAccountDetails.Services
 
             if (recipientResponse.IsSuccessStatusCode)
             {
-                var listResponse = recipientResponse.Content.ReadAsStringAsync().Result;
-                var getResponse = JsonConvert.DeserializeObject<ListBankResponse>(listResponse);
-
-                /* var tasks = getResponse.data.Select(async pair =>
-                 {
-                     //var bankResponse = await _resolveAccount.ResolveFlutterAccountNumber(_apiKey, apiUrl + pair.code, new KeyValuePair<string, string>(pair.code, pair.name));
-                     if (pair.code != null && pair.name != null)
-                     {
-                         listofBanksCode.Add(pair.code, pair.name);
-                     }
-                 });*/
-                foreach (var pair in getResponse.data)
+                string listResponse = recipientResponse.Content.ReadAsStringAsync().Result;
+                ListBankResponse? getResponse = JsonConvert.DeserializeObject<ListBankResponse>(listResponse);
+                foreach (ListBankResponse.Data pair in getResponse.data)
                 {
                     if (!string.IsNullOrEmpty(pair.code) && !string.IsNullOrEmpty(pair.name))
                     {
                         listofBanksCode[pair.code] = pair.name; // Using indexer to avoid duplicate key exception
                     }
                 }
-                //await Task.WhenAll(tasks);
                 return listofBanksCode;
             }
 
