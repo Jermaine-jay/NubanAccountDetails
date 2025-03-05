@@ -58,20 +58,6 @@
             return result;
         }
 
-
-
-        //public async Task<HttpResponseMessage> GetRequest(string apiUrl, string apiKey)
-        //{
-        //    using (var httpClient = new HttpClient())
-        //    {
-        //        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        //        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        //        var cts = new CancellationTokenSource();
-        //        var recipientResponse = await httpClient.GetAsync(apiUrl, cts.Token);
-        //        return recipientResponse;
-        //    }
-        //}
-
         public async Task<Dictionary<string, string>> GetBanks()
         {
             var listofBanksCode = new Dictionary<string, string>();

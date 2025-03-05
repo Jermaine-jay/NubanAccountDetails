@@ -11,7 +11,6 @@
 
         }
 
-
         public async Task<object> FlutterwaveResolveAccountNumber(string accountNumber)
         {
             string? apiUrl = $"https://api.flutterwave.com/v3/accounts/resolve";
