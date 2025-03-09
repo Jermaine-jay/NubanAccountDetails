@@ -1,7 +1,10 @@
-﻿namespace NubanAccountDetails.Paystack
+﻿
+
+namespace NubanAccountDetails.Paystack
 {
     public interface IResolveAccount
     {
-        Task<object> PaystackResolveAccountNumberAsync(string accountNumber);
+        Task<Dictionary<string, string>> GetBanks();
+        Task<ResolveAccountNumberResponse> PaystackResolveAccountNumberAsync(string accountNumber);
     }
 }

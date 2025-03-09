@@ -13,13 +13,20 @@ namespace NubanAccountDetails.Controllers
         public PaystackController()
         {
             _apiKey = "sk_test_6c6fc60af0119e14cad8cad7000eb9916014a998";
-            _paystackResolveAccount = new PaystackResolveAccount(_apiKey);
+            _paystackResolveAccount = new PaystackResolveAccount(_apiKey, "NGN");
         }
 
         [HttpGet("resolve-paystack-account")]
         public async Task<IActionResult> GetPaystack(string request)
         {
             var result = await _paystackResolveAccount.ResolveAccount.PaystackResolveAccountNumberAsync(request);
+            return Ok(result);
+        }
+
+        [HttpGet("get-banks")]
+        public async Task<IActionResult> Getbank(string currency)
+        {
+            var result = await _paystackResolveAccount.ResolveAccount.GetBanks();
             return Ok(result);
         }
     }

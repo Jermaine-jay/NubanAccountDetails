@@ -3,16 +3,16 @@
     public class ResolveAccount : IResolveAccount
     {
         protected readonly PaystackResolveAccount _api;
-        private readonly string _apiKey;
+        private readonly string _currency;
 
 
-        public ResolveAccount(PaystackResolveAccount api)
+        public ResolveAccount(PaystackResolveAccount api, string currency)
         {
             _api = api;
-            _apiKey = "sk_test_6c6fc60af0119e14cad8cad7000eb9916014a998";
+            _currency = currency;
         }
 
-        public async Task<object> GetResolveAccountNumberAsync(string accountNumber, Dictionary<string, string> dict)
+        public async Task<ResolveAccountNumberResponse> GetResolveAccountNumberAsync(string accountNumber, Dictionary<string, string> dict)
         {
             var tasks = dict.Select(async bank =>
             {
@@ -51,21 +51,21 @@
             return res;
         }
 
-        public async Task<object> PaystackResolveAccountNumberAsync(string accountNumber)
+        public async Task<ResolveAccountNumberResponse> PaystackResolveAccountNumberAsync(string accountNumber)
         {
-            var getbanks = await GetBanks();
-            var result = await GetResolveAccountNumberAsync(accountNumber, getbanks);
+            Dictionary<string, string> getbanks = await GetBanks();
+            ResolveAccountNumberResponse result = await GetResolveAccountNumberAsync(accountNumber, getbanks);
             return result;
         }
 
         public async Task<Dictionary<string, string>> GetBanks()
         {
-            var listofBanksCode = new Dictionary<string, string>();
+            Dictionary<string, string> listofBanksCode = new Dictionary<string, string>();
 
-            var recipientResponse = await _api.GetAsync<BankResponse, object>("bank?currency", new
+            BankResponse recipientResponse = await _api.GetAsync<BankResponse, object>("bank?currency", new
             {
-                currency = "NGN"
-            }, null);
+                currency =  _currency ?? "NGN"
+            });
 
             if (recipientResponse.Status)
             {
@@ -78,7 +78,7 @@
                 }
                 return listofBanksCode;
             }
-            return null;
+            return listofBanksCode;
         }
     }
 }

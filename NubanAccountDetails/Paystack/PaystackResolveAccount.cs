@@ -17,7 +17,7 @@ namespace NubanAccountDetails.Paystack
 
         public IResolveAccount ResolveAccount { get; }
 
-        public PaystackResolveAccount(string secretKey)
+        public PaystackResolveAccount(string secretKey, string currency = null)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 
@@ -26,7 +26,7 @@ namespace NubanAccountDetails.Paystack
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secretKey);
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            ResolveAccount = new ResolveAccount(this);
+            ResolveAccount = new ResolveAccount(this, currency);
         }
 
         public static TR ParseAndResolveMetadata<TR>(ref string rawJson, string bankName = null) where TR : IApiResponse
